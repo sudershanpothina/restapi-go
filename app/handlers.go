@@ -1,10 +1,12 @@
 package app
 
-import(
-	"net/http"
-	"fmt"
-	"encoding/xml"
+import (
 	"encoding/json"
+	"encoding/xml"
+	"fmt"
+	"net/http"
+
+	"github.com/gorilla/mux"
 )
 
 func hello(w http.ResponseWriter, r *http.Request){
@@ -23,6 +25,14 @@ func getAllCustomers(w http.ResponseWriter, r *http.Request){
 		json.NewEncoder(w).Encode(customers)
 	}
 	
+}
+func getCustomer(w http.ResponseWriter, r *http.Request){
+	vars := mux.Vars(r)
+	fmt.Fprint(w, vars["customer_id"])
+
+}
+func createCustomer(w http.ResponseWriter, r *http.Request){
+	fmt.Fprint(w, "Post request received")
 }
 type Customer struct {
 	Name string `json:"name" xml:"name"`
