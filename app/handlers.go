@@ -2,40 +2,40 @@ package app
 
 import (
 	"encoding/json"
-	"encoding/xml"
-	"fmt"
 	"net/http"
+	"time"
 
 	"github.com/gorilla/mux"
 )
 
-func hello(w http.ResponseWriter, r *http.Request){
-	fmt.Fprint(w, "Hello")
+func getTime(w http.ResponseWriter, r *http.Request){
+	wtime := new(WorldTime)
+	wtime.CurrentTime = time.Now()
+	w.Header().Add("Content-Type", "application/json")
+	json.NewEncoder(w).Encode(wtime)	
 }
-func getAllCustomers(w http.ResponseWriter, r *http.Request){
-	customers := []Customer {
-		{Name: "Subject1", City: "City1", ZipCode: "400040"},
-		{Name: "Subject2", City: "City2", ZipCode: "500032"},
-	}
-	if r.Header.Get("Content-Type") == "application/xml" {
-		w.Header().Add("Content-Type", "application/xml")
-		xml.NewEncoder(w).Encode(customers)
-	}else {
-		w.Header().Add("Content-Type", "application/json")
-		json.NewEncoder(w).Encode(customers)
-	}
-	
-}
-func getCustomer(w http.ResponseWriter, r *http.Request){
+func getTimeByLocation(w http.ResponseWriter, r *http.Request){
 	vars := mux.Vars(r)
-	fmt.Fprint(w, vars["customer_id"])
+	wtime := new(WorldTime)
+	if vars["tz"] == "Asia" {
+		wtime.Asia = getLocalTime("Asia/Shanghai")
+	}
+	if vars["tz"] == "America" {
+		wtime.America = getLocalTime("America/New_York")
+	}
+	w.Header().Add("Content-Type", "application/json")
+	json.NewEncoder(w).Encode(wtime)
 
 }
-func createCustomer(w http.ResponseWriter, r *http.Request){
-	fmt.Fprint(w, "Post request received")
+
+func getLocalTime(location string) time.Time {
+	loc, _ := time.LoadLocation(location)
+	return time.Now().In(loc)
 }
-type Customer struct {
-	Name string `json:"name" xml:"name"`
-	City string `json:"city" xml:"city"`
-	ZipCode string `json:"zip" xml:"zip"`
+
+type WorldTime struct {
+	CurrentTime time.Time `json:"current_time"`
+	Asia time.Time `json:"Asia/Kolkata"`
+	America time.Time `json:"America/New_York"`
+
 }
